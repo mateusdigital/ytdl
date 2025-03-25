@@ -45,7 +45,7 @@ export const Download_Schema = Joi.object({
 
 function     _GetDefaultDownloadPath()
 {
-  return process.env.DOWNLOAD_PATH || "./downloads";
+  return process.env.DOWNLOAD_PATH || "./public/_download";
 }
 
 // -----------------------------------------------------------------------------

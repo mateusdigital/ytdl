@@ -50,7 +50,7 @@ export class YoutubeDownloader
   public static GetVideoFilenameFromUrl(inputUrl: string): string
   {
     const video_id = ytdl.getVideoID(inputUrl);
-    const filename = `${video_id}.webm`;
+    const filename = `${video_id}.mp4`;
     return filename;
   }
 
@@ -96,7 +96,15 @@ export class YoutubeDownloader
 function _SpawnProcess_ytdlp(
   filename: string, url: string, writer: any|null, resolve: any, reject: any)
 {
-  const process = spawn('yt-dlp', [ "--verbose", '-o', filename, url ]);
+  const process = spawn('yt-dlp', [
+
+    "--verbose",
+    "-S",
+    "ext:mp4:m4a",
+    '-o',
+    filename,
+    url
+  ]);
   //
   process.stdout.on('data', (data) => {
     writer!.write(`data: ${data.toString()}\n\n`);

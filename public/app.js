@@ -9,16 +9,17 @@ const g_MediaCover          = document.getElementById("mediaCover");
 const g_FetchButton         = document.getElementById("playBtn");
 const g_DownloadMusicButton = document.getElementById("downloadMusicButton");
 const g_DownloadVideoButton = document.getElementById("downloadVideoButton");
-const g_StatusMsg           = document.getElementById("statusMsg");
 const g_ProgressBar         = document.getElementById("progressBar");
 //
 // Constants
 //
 
 // -----------------------------------------------------------------------------
-const STREAM_ENDPOINT   = "http://localhost:3000/api/stream/";
-const INFO_ENDPOINT     = "http://localhost:3000/api/info/";
-const DOWNLOAD_ENDPOINT = "http://localhost:3000/api/download/";
+const STREAM_ENDPOINT         = "http://localhost:3000/api/stream/";
+const INFO_ENDPOINT           = "http://localhost:3000/api/info/";
+const DOWNLOAD_VIDEO_ENDPOINT = "http://localhost:3000/api/download-video/";
+const CONVERT_VIDEO_ENDPOINT  = "http://localhost:3000/api/convert-video/";
+const DOWNLOAD_LINK           = "http://localhost:3000/_download/";
 
 //
 // Globals
@@ -58,26 +59,34 @@ async function _OnStartFetchDataButtonClicked()
     g_YoutubeUrl            = g_YoutubeUrlInput.value || g_YoutubeUrl;
     g_YoutubeUrlInput.value = g_YoutubeUrl;
 
-    g_FetchButton.className = "buttonDisabled";
-    g_FetchButton.innerText = "Fetching...";
+    g_FetchButton.className         = "buttonDisabled";
+    g_FetchButton.innerText         = "Fetching Info...";
+    g_DownloadMusicButton.className = "buttonDisabled";
+    g_DownloadVideoButton.className = "buttonDisabled";
 
     try {
       const info_response = await _FetchInfo();
-      g_InfoData          = await          info_response.json();
+      const json          = await info_response.json();
+      g_InfoData          = json.payload;
 
       _SetCoverImage();
-      if (g_InfoData.downloaded) {
-        g_FetchButton.innerText         = "Fetch again...";
-        g_FetchButton.className         = "";
-        g_DownloadMusicButton.className = "";
+      g_FetchButton.className = "";
+      g_FetchButton.innerText = "Fetch again...";
+
+      //
+      if (g_InfoData.videoExists) {
         g_DownloadVideoButton.className = "";
 
-        _SetAudioStream();
+        if (g_InfoData.audioExists) {
+          g_DownloadMusicButton.className = "";
+          _SetAudioStream();
+        }
       }
       else {
         g_FetchButton.innerText = "Downloading data...";
         g_FetchButton.className = "buttonDownloading";
-        _CallDownloadApi();
+
+        _CallDownloadVideoApi();
       }
     }
     catch (error) {
@@ -93,15 +102,23 @@ async function _OnStartFetchDataButtonClicked()
 // -----------------------------------------------------------------------------
 function _OnDownloadMusicButtonClicked()
 {
-  const url     = "https://example.com/samplefile.zip"; // Replace with your URL
-  const link    = document.createElement("a");
-  link.href     = url;
-  link.download = url.split("/").pop(); // Extracts the file name from the URL
-  link.target   = "_blank";             // Opens the link in a new tab
+  const url  = `${DOWNLOAD_LINK}/${g_InfoData.audioFilename}`;
+  const link = document.createElement("a");
+  link.href  = url;
+  // link.download = url.split("/").pop(); // Extracts the file name from the URL
+  link.target = "_blank";
   link.click();
 }
 // -----------------------------------------------------------------------------
-function _OnDownloadVideoButtonClicked() {}
+function _OnDownloadVideoButtonClicked()
+{
+  const url  = `${DOWNLOAD_LINK}/${g_InfoData.videoFilename}`;
+  const link = document.createElement("a");
+  link.href  = url;
+  // link.download = url.split("/").pop(); // Extracts the file name from the URL
+  link.target = "_blank";
+  link.click();
+}
 
 //
 // Helpers
@@ -116,10 +133,7 @@ function _SetCoverImage()
     data.info?.player_response?.videoDetails?.thumbnail?.thumbnails?.pop()?.url;
   g_MediaCover.src = thumbnail || "";
 
-  g_MediaCover.onload = () => {
-    g_StatusMsg.innerText      = "Playing";
-    g_MediaCover.style.display = "block";
-  };
+  g_MediaCover.onload = () => { g_MediaCover.style.display = "block"; };
 }
 
 // -----------------------------------------------------------------------------
@@ -128,14 +142,8 @@ function _SetAudioStream()
   const youtubeUrl  = g_YoutubeUrl;
   g_AudioPlayer.src = `${STREAM_ENDPOINT}${youtubeUrl}`;
   g_AudioPlayer.play()
-    .then(() => {
-      g_StatusMsg.innerText       = "Playing";
-      g_AudioPlayer.style.display = "block";
-    })
-    .catch((error) => {
-      console.error("Error playing audio:", error);
-      g_StatusMsg.innerText = "Error playing audio";
-    });
+    .then(() => { g_AudioPlayer.style.display = "block"; })
+    .catch((error) => { console.error("Error playing audio:", error); });
 }
 
 //
@@ -143,38 +151,35 @@ function _SetAudioStream()
 //
 
 // -----------------------------------------------------------------------------
-async function _CallDownloadApi()
+async function _CallDownloadVideoApi()
 {
   const youtubeUrl = g_YoutubeUrl;
   const encoded    = encodeURIComponent(youtubeUrl);
-  const url        = `${DOWNLOAD_ENDPOINT}${encoded}`;
+  const url        = `${DOWNLOAD_VIDEO_ENDPOINT}${encoded}`;
 
   try {
     const event_source = new EventSource(url);
-    //
-    event_source.onmessage = (event) => {
-      //
-      g_StatusMsg.innerText       = event.data;
-      g_ProgressBar.style.cssText = `width: 20%`;
-    };
-
-    //
-    event_source.onerror = (err) => {
-      g_StatusMsg.innerText = "ERROR: " + JSON.stringify(err);
-      event_source.close();
-      _SetAudioStream(youtubeUrl);
-    };
-
     //
     event_source.onopen = () => {
       //
       console.log('Connection opened');
     };
+    //
+
+    event_source.onmessage = (event) => {
+      //
+    };
+
+    //
+    event_source.onerror = (err) => {
+      event_source.close();
+      _OnDownloadVideoApiCallDidFinish();
+    };
 
     //
     event_source.onclose = () => {
-      console.log('Connection closed');
-      _SetAudioStream(youtubeUrl);
+      //
+      _OnDownloadVideoApiCallDidFinish();
     };
   }
   catch (err) {
@@ -183,13 +188,62 @@ async function _CallDownloadApi()
 }
 
 // -----------------------------------------------------------------------------
-async function _OnDownloadApiCallDidFinish()
+async function _OnDownloadVideoApiCallDidFinish()
 {
-  g_FetchButton.innerText         = "Fetch again...";
-  g_FetchButton.className         = "";
-  g_DownloadMusicButton.className = "";
+  g_FetchButton.innerText = "Converting video...";
+  g_FetchButton.className = "buttonConverting";
+
   g_DownloadVideoButton.className = "";
+  _CallConvertVideoApi();
 }
+
+// -----------------------------------------------------------------------------
+async function _CallConvertVideoApi()
+{
+  const youtubeUrl = g_YoutubeUrl;
+  const encoded    = encodeURIComponent(youtubeUrl);
+  const url        = `${CONVERT_VIDEO_ENDPOINT}${encoded}`;
+
+  try {
+    const event_source = new EventSource(url);
+    //
+    event_source.onopen = () => {
+      //
+      console.log('Connection opened');
+    };
+    //
+
+    event_source.onmessage = (event) => {
+      //
+    };
+
+    //
+    event_source.onerror = (err) => {
+      event_source.close();
+      _OnConvertVideoApiCallDidFinish();
+    };
+
+    //
+    event_source.onclose = () => {
+      //
+      _OnConvertVideoApiCallDidFinish();
+    };
+  }
+  catch (err) {
+    console.log(err);
+  }
+}
+// -----------------------------------------------------------------------------
+function _OnConvertVideoApiCallDidFinish()
+{
+  g_DownloadMusicButton.className = "";
+
+  g_FetchButton.innerText = "Fetch again...";
+  g_FetchButton.className = "";
+
+  _SetAudioStream();
+}
+
 //
 // Entry Point
 //

@@ -5,6 +5,13 @@
   font-style: normal;
 }
 
+@font-face {
+  font-family: 'Keycaps';
+  src: url('./keycaps.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -138,29 +145,34 @@ audio {
 
 /* -------------------------------------------------------------------------- */
 button {
-  border: none;
-  padding: 0.7rem;
-  background-color: #564236;
-  color: white;
   font-weight: bold;
   text-transform: uppercase;
-  cursor: pointer;
+  font-family: 'Keycaps', sans-serif;
+  font-size: 1.2rem;
+
+  border: none;
   border-radius: 4px;
-  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
-  box-shadow: 0 8px #4c3a2f;
+
+  padding: 0.7rem;
   margin-bottom: 8px;
   cursor: hand;
+
+  color: #ece6e4;
+  background-color: hsl(21, 25%, 35%);
+  box-shadow: 0 8px hsl(21, 25%, 20%);
+
+  /* transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out; */
 }
 
 
 /* -------------------------------------------------------------------------- */
 button:hover {
-  background-color: #4b392f;
-  box-shadow: 0 8px #372A22;
+  background-color: hsl(21, 25%, 40%);
+  box-shadow: 0 8px hsl(21, 25%, 25%);
 }
 
 button:active {
-  box-shadow: 0 3px #2A2118;
+  box-shadow: 0 3px hsl(21, 25%, 25%);
   transform: translateY(4px);
 }
 
@@ -168,38 +180,61 @@ button:active {
 
 /* -------------------------------------------------------------------------- */
 .buttonDisabled {
-  background-color: rgb(108, 108, 108);
-  color: white;
+  background-color: hsl(0, 0%, 40%);
+  box-shadow: 0 5px hsl(0, 0%, 25%);
+
   transform: translateY(4px);
-  box-shadow: 0 5px rgb(59, 59, 59);
   cursor: not-allowed;
 }
 
 /* -------------------------------------------------------------------------- */
 .buttonDisabled:hover {
-  background-color: rgb(108, 108, 108);
-  color: white;
+  background-color: hsl(0, 0%, 40%);
+  box-shadow: 0 5px hsl(0, 0%, 25%);
+
   transform: translateY(4px);
-  box-shadow: 0 5px rgb(59, 59, 59);
   cursor: not-allowed;
 }
 
 /* -------------------------------------------------------------------------- */
 .buttonDownloading {
-  background-color: rgb(89, 86, 255);
-  color: white;
+  background-color: hsl(84, 41%, 40%);
+  box-shadow: 0 5px hsl(84, 41%, 25%);
+
   transform: translateY(4px);
-  box-shadow: 0 5px rgb(59, 59, 59);
   cursor: not-allowed;
 }
 
 /* -------------------------------------------------------------------------- */
 .buttonDownloading:hover {
-  background-color: rgb(89, 86, 255);
-  color: white;
+  background-color: hsl(84, 41%, 40%);
+  box-shadow: 0 5px hsl(84, 41%, 25%);
+
   transform: translateY(4px);
-  box-shadow: 0 5px rgb(59, 59, 59);
   cursor: not-allowed;
+}
+
+/* -------------------------------------------------------------------------- */
+.buttonConverting {
+  background-color: hsl(282, 41%, 40%);
+  box-shadow: 0 5px hsl(282, 41%, 25%);
+
+  transform: translateY(4px);
+  cursor: not-allowed;
+}
+
+/* -------------------------------------------------------------------------- */
+.buttonConverting:hover {
+  background-color: hsl(282, 41%, 40%);
+  box-shadow: 0 5px hsl(282, 41%, 25%);
+
+  transform: translateY(4px);
+  cursor: not-allowed;
+}
+
+.version {
+  font-size: 0.8rem;
+  font-family: "Keycaps", sans-serif;
 }
 
 /* -------------------------------------------------------------------------- */
