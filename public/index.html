@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Music Streamer</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+  <div class="app">
+    <header>
+      <h1>ytdl</h1>
+      <h2>mateusdigital</h2>
+    </header>
+
+    <main>
+      <div class="coverContainer">
+        <img id="mediaCover" src="https://placehold.co/300x300" alt="Cover Art" />
+      </div>
+      <audio id="audioPlayer" controls></audio>
+
+      <div class="controlsContainer">
+        <input id="youtubeInput" type="text" placeholder="Enter YouTube URL" oninput="_OnChange()" />
+        <button id="playBtn">Fetch Video</button>
+        <div class="downloadButtonsContainer">
+          <button id="downloadMusicButton" class="buttonDisabled">Download Music</button>
+          <button id="downloadVideoButton" class="buttonDisabled">Download Video</button>
+        </div>
+      </div>
+      <!-- <div class="status">
+        <span id="statusMsg"></span>
+      </div> -->
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+
+</html>

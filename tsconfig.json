@@ -1,0 +1,33 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".", // Sets the base URL for resolving paths
+    "paths": {
+      "@/*": [
+        "source/*"
+      ],
+      "@/mdweb/*": [
+        "lib/mdweb/source/*"
+      ],
+    },
+    "emitDecoratorMetadata": true,
+    "esModuleInterop": true,
+    "experimentalDecorators": true,
+    "forceConsistentCasingInFileNames": true, /* Enforce consistent case in file names. */
+    "module": "Node16", /* Use Node.js module system. */
+    "moduleResolution": "Node16", /* Resolve modules based on Node.js. */
+    "outDir": "./dist", /* Output directory for compiled JavaScript files. */
+    "resolveJsonModule": true, /* Enable importing .json files. */
+    "skipLibCheck": true,
+    "strict": true, /* Enable strict type-checking. */
+    "strictPropertyInitialization": false, // Optional: For uninitialized properties
+    "target": "ES2020",
+  },
+  "include": [
+    "source/**/*.ts" /* Include all TypeScript files in the 'src' folder. */,
+    "public/AccountController.ts",
+    "uniqkiller-models/gen-models.ts"
+  ],
+  "exclude": [
+    "node_modules" /* Exclude the 'node_modules' folder. */
+  ]
+}
