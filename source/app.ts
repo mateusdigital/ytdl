@@ -12,6 +12,7 @@ import {
 import packageJson from '../package.json';
 // -----------------------------------------------------------------------------
 import {ServiceRoutesController} from './controllers/RoutesController';
+import {SetupServiceInfoRoutes} from '../lib/mdweb/source/Routes/DefaultRoutes';
 
 //
 // Env
@@ -35,6 +36,8 @@ App.Init(options);
 
   console.log('Public path: ', options.publicPath);
   app.use(express.static(options.publicPath));
+
+  SetupServiceInfoRoutes(app, path.join(options.publicPath, "index.html"));
   SetupRoutesWithController(ServiceRoutesController, app);
   SetupErrorHandler(app);
   // // Global error handler
