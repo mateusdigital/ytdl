@@ -15,11 +15,13 @@ const g_ProgressBar         = document.getElementById("progressBar");
 //
 
 // -----------------------------------------------------------------------------
-const STREAM_ENDPOINT         = "http://localhost:3000/api/stream/";
-const INFO_ENDPOINT           = "http://localhost:3000/api/info/";
-const DOWNLOAD_VIDEO_ENDPOINT = "http://localhost:3000/api/download-video/";
-const CONVERT_VIDEO_ENDPOINT  = "http://localhost:3000/api/convert-video/";
-const DOWNLOAD_LINK           = "http://localhost:3000/_download/";
+const baseUrl = window.location;
+// -----------------------------------------------------------------------------
+const STREAM_ENDPOINT         = `${baseUrl}api/stream/`;
+const INFO_ENDPOINT           = `${baseUrl}api/info/`;
+const DOWNLOAD_VIDEO_ENDPOINT = `${baseUrl}api/download-video/`;
+const CONVERT_VIDEO_ENDPOINT  = `${baseUrl}api/convert-video/`;
+const DOWNLOAD_LINK           = `${baseUrl}_download/`;
 
 //
 // Globals
