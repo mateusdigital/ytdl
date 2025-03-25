@@ -23,9 +23,9 @@
 import ytdl from "@distube/ytdl-core";
 import {spawn} from 'child_process';
 // -----------------------------------------------------------------------------
-import {FileUtils} from "@/mdweb/FileUtils";
-import {JsonUtils} from "@/mdweb/JsonUtils";
-import {Logger} from "@/mdweb/Logger";
+import {FileUtils} from "../../lib/mdweb/source/FileUtils";
+import {JsonUtils} from "../../lib/mdweb/source/JsonUtils";
+import {Logger} from "../../lib/mdweb/source/Logger";
 
 //
 // Class

@@ -3,9 +3,11 @@ import mongoose from 'mongoose';
 import path from 'path'
 import express from 'express';
 // -----------------------------------------------------------------------------
-import {App} from '@/mdweb/Express/App';
-import {SetupRoutesWithController} from '@/mdweb/Routes/RouteUtils';
-import {SetupErrorHandler} from '@/mdweb/Express/Middleware/ErrorHandler';
+import {App} from '../lib/mdweb/source/Express/App';
+import {SetupRoutesWithController} from '../lib/mdweb/source/Routes/RouteUtils';
+import {
+  SetupErrorHandler
+} from '../lib/mdweb/source/Express/Middleware/ErrorHandler';
 // -----------------------------------------------------------------------------
 import packageJson from '../package.json';
 // -----------------------------------------------------------------------------

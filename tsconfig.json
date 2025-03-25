@@ -1,14 +1,7 @@
 {
   "compilerOptions": {
     "baseUrl": ".",
-    "paths": {
-      "@/*": [
-        "source/*"
-      ],
-      "@/mdweb/*": [
-        "lib/mdweb/source/*"
-      ]
-    },
+    "paths": {},
     "rootDir": ".", // Ensure all source files are included
     "outDir": "./dist",
     "module": "Node16",

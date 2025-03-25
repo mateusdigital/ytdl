@@ -5,16 +5,16 @@ import fs from "fs";
 // -----------------------------------------------------------------------------
 import {Request, Response} from "express";
 // -----------------------------------------------------------------------------
-import {Assert} from "@/mdweb/Assert";
-import {ResponseStatus} from "@/mdweb/Net/ResponseStatus";
-import {GET, POST} from "@/mdweb/Routes/RouteDecorators";
-import {FileUtils} from "@/mdweb/FileUtils";
-import {Error_CriticalError} from "@/mdweb/ErrorUtils/Exceptions";
+import {Assert} from "../../lib/mdweb/source/Assert";
+import {ResponseStatus} from "../../lib/mdweb/source/Net/ResponseStatus";
+import {GET, POST} from "../../lib/mdweb/source/Routes/RouteDecorators";
+import {FileUtils} from "../../lib/mdweb/source/FileUtils";
+import {Error_CriticalError} from "../../lib/mdweb/source/ErrorUtils/Exceptions";
 import {
   ThrowCriticalErrorIf,
   ThrowNotFoundErrorIf
-} from "@/mdweb/ErrorUtils/ThrowIf";
-import {Logger} from "@/mdweb/Logger";
+} from "../../lib/mdweb/source/ErrorUtils/ThrowIf";
+import {Logger} from "../../lib/mdweb/source/Logger";
 // -----------------------------------------------------------------------------
 import {YoutubeDownloader} from "./YoutubeDownloader";
 import WritableBase from "stream";
