@@ -3,13 +3,13 @@
 //
 
 // -----------------------------------------------------------------------------
-const g_YoutubeUrlInput     = document.getElementById("youtubeInput");
-const g_AudioPlayer         = document.getElementById("audioPlayer");
-const g_MediaCover          = document.getElementById("mediaCover");
-const g_FetchButton         = document.getElementById("playBtn");
+const g_YoutubeUrlInput = document.getElementById("youtubeInput");
+const g_AudioPlayer = document.getElementById("audioPlayer");
+const g_MediaCover = document.getElementById("mediaCover");
+const g_FetchButton = document.getElementById("playBtn");
 const g_DownloadMusicButton = document.getElementById("downloadMusicButton");
 const g_DownloadVideoButton = document.getElementById("downloadVideoButton");
-const g_ProgressBar         = document.getElementById("progressBar");
+const g_ProgressBar = document.getElementById("progressBar");
 //
 // Constants
 //
@@ -17,11 +17,11 @@ const g_ProgressBar         = document.getElementById("progressBar");
 // -----------------------------------------------------------------------------
 const baseUrl = window.location;
 // -----------------------------------------------------------------------------
-const STREAM_ENDPOINT         = `${baseUrl}api/stream/`;
-const INFO_ENDPOINT           = `${baseUrl}api/info/`;
+const STREAM_ENDPOINT = `${baseUrl}api/stream/`;
+const INFO_ENDPOINT = `${baseUrl}api/info/`;
 const DOWNLOAD_VIDEO_ENDPOINT = `${baseUrl}api/download-video/`;
-const CONVERT_VIDEO_ENDPOINT  = `${baseUrl}api/convert-video/`;
-const DOWNLOAD_LINK           = `${baseUrl}_download/`;
+const CONVERT_VIDEO_ENDPOINT = `${baseUrl}api/convert-video/`;
+const DOWNLOAD_LINK = `${baseUrl}_download/`;
 
 //
 // Globals
@@ -29,11 +29,10 @@ const DOWNLOAD_LINK           = `${baseUrl}_download/`;
 
 // -----------------------------------------------------------------------------
 let g_YoutubeUrl = "https://www.youtube.com/watch?v=wB7FXxNLH6g";
-let g_InfoData   = null;
+let g_InfoData = null;
 
 // -----------------------------------------------------------------------------
-function _IsAnPossibleValidYoutubeUrl(url)
-{
+function _IsAnPossibleValidYoutubeUrl(url) {
   const pattern = /^(http(s)?:\/\/)?((w){3}.)?youtu(be|.be)?(\.com)?\/.+/;
   return pattern.test(url);
 }
@@ -42,81 +41,120 @@ function _IsAnPossibleValidYoutubeUrl(url)
 // UI Handlers
 //
 
-// -----------------------------------------------------------------------------
-async function _FetchInfo()
-{
-  const info_response = await fetch(`${INFO_ENDPOINT}${g_YoutubeUrl}`);
-  if (!info_response.ok) {
-    return null;
-  }
+function _CreateLoadingSpinner() {
+  return `
+  <div class="lds-facebook">
+    <div></div>
+    <div></div>
+    <div></div>
+  </div>
+  `;
+}
 
-  return info_response;
+
+function _SetStateToReadyToFetchData() {
+  g_FetchButton.innerHTML = "Fetch info";// + _CreateLoadingSpinner();
+  g_FetchButton.className = "";
+
+  g_DownloadMusicButton.className = (g_InfoData?.audioExists) ? "" : "buttonDisabled";
+  g_DownloadVideoButton.className = (g_InfoData?.videoExists) ? "" : "buttonDisabled";
+
+}
+
+function _SetStateToFetchingData() {
+  g_FetchButton.innerHTML = "Fetching info" + _CreateLoadingSpinner();
+  g_FetchButton.className = "buttonDisabled";
+  g_DownloadMusicButton.className = "buttonDisabled";
+  g_DownloadVideoButton.className = "buttonDisabled";
+}
+
+function _SetStateToDownloadingVideo() {
+  g_FetchButton.innerHTML = "Downloading video" + _CreateLoadingSpinner();
+  g_FetchButton.className = "buttonDownloading";
+  g_DownloadMusicButton.className = "buttonDisabled";
+  g_DownloadVideoButton.className = "buttonDisabled";
+}
+
+function _SetStateToConvertingVideo() {
+  g_FetchButton.innerHTML = "Converting video" + _CreateLoadingSpinner();
+  g_FetchButton.className = "buttonConverting";
+
+  g_DownloadVideoButton.className = "";
 }
 
 // -----------------------------------------------------------------------------
-async function _OnStartFetchDataButtonClicked()
-{
+async function _OnStartFetchDataButtonClicked() {
   try {
     //
-    g_YoutubeUrl            = g_YoutubeUrlInput.value || g_YoutubeUrl;
+    g_YoutubeUrl = g_YoutubeUrlInput.value || g_YoutubeUrl;
     g_YoutubeUrlInput.value = g_YoutubeUrl;
 
-    g_FetchButton.className         = "buttonDisabled";
-    g_FetchButton.innerText         = "Fetching Info...";
-    g_DownloadMusicButton.className = "buttonDisabled";
-    g_DownloadVideoButton.className = "buttonDisabled";
+    _SetStateToFetchingData();
 
-    try {
-      const info_response = await _FetchInfo();
-      const json          = await info_response.json();
-      g_InfoData          = json.payload;
+    // Try to get the video info...
+    const info_response = await fetch(`${INFO_ENDPOINT}${g_YoutubeUrl}`);
+    if (info_response.status != 200) {
+      _ShowErrorToast({
+        message: "Error fetching video info",
+      });
 
-      _SetCoverImage();
-      g_FetchButton.className = "";
-      g_FetchButton.innerText = "Fetch again...";
+      _SetStateToReadyToFetchData();
+      return null;
+    }
 
-      //
-      if (g_InfoData.videoExists) {
-        g_DownloadVideoButton.className = "";
+    // Parse the date in json format
+    const json = await info_response.json();
+    g_InfoData = json.payload;
 
-        if (g_InfoData.audioExists) {
-          g_DownloadMusicButton.className = "";
-          _SetAudioStream();
-        }
-      }
-      else {
-        g_FetchButton.innerText = "Downloading data...";
-        g_FetchButton.className = "buttonDownloading";
+    // Update UI.
+    _SetCoverImage();
 
-        _CallDownloadVideoApi();
+    g_FetchButton.className = "";
+    g_FetchButton.innerText = "Fetch again...";
+
+    // Video exists -- Unlock the button...
+    if (g_InfoData.videoExists) {
+      g_DownloadVideoButton.className = "";
+
+      // Audio exists -- Unlock the button...
+      if (g_InfoData.audioExists) {
+        g_DownloadMusicButton.className = "";
+        _SetAudioStream();
+      } else {
+        _OnDownloadVideoApiCallDidFinish()
       }
     }
-    catch (error) {
-      console.log(error);
-      // _SetError(error);
+    // Video not exits -- Call api to download it.
+    else {
+      _SetStateToDownloadingVideo();
+      _CallDownloadVideoApi();
     }
   }
-  catch (err) {
-    alert("Error: " + err.message);
+  catch (error) {
+    console.error("Error fetching video info:", error);
+    _ShowErrorToast({
+      message: "Error fetching video info - " + error.message,
+    });
+
+    _SetStateToReadyToFetchData();
+    return null;
   }
 }
 
 // -----------------------------------------------------------------------------
-function _OnDownloadMusicButtonClicked()
-{
-  const url  = `${DOWNLOAD_LINK}/${g_InfoData.audioFilename}`;
+function _OnDownloadMusicButtonClicked() {
+  const url = `${DOWNLOAD_LINK}/${g_InfoData.audioFilename}`;
   const link = document.createElement("a");
-  link.href  = url;
+  link.href = url;
   // link.download = url.split("/").pop(); // Extracts the file name from the URL
   link.target = "_blank";
   link.click();
 }
 // -----------------------------------------------------------------------------
-function _OnDownloadVideoButtonClicked()
-{
-  const url  = `${DOWNLOAD_LINK}/${g_InfoData.videoFilename}`;
+function _OnDownloadVideoButtonClicked() {
+  const url = `${DOWNLOAD_LINK}/${g_InfoData.videoFilename}`;
   const link = document.createElement("a");
-  link.href  = url;
+  link.href = url;
   // link.download = url.split("/").pop(); // Extracts the file name from the URL
   link.target = "_blank";
   link.click();
@@ -127,8 +165,7 @@ function _OnDownloadVideoButtonClicked()
 //
 
 // -----------------------------------------------------------------------------
-function _SetCoverImage()
-{
+function _SetCoverImage() {
   data = g_InfoData;
 
   const thumbnail =
@@ -139,9 +176,8 @@ function _SetCoverImage()
 }
 
 // -----------------------------------------------------------------------------
-function _SetAudioStream()
-{
-  const youtubeUrl  = g_YoutubeUrl;
+function _SetAudioStream() {
+  const youtubeUrl = g_YoutubeUrl;
   g_AudioPlayer.src = `${STREAM_ENDPOINT}${youtubeUrl}`;
   g_AudioPlayer.play()
     .then(() => { g_AudioPlayer.style.display = "block"; })
@@ -152,92 +188,88 @@ function _SetAudioStream()
 // Api Calls
 //
 
+
 // -----------------------------------------------------------------------------
-async function _CallDownloadVideoApi()
-{
+async function _CallFetchInfoApi() {
+}
+
+// -----------------------------------------------------------------------------
+async function _CallDownloadVideoApi() {
   const youtubeUrl = g_YoutubeUrl;
-  const encoded    = encodeURIComponent(youtubeUrl);
-  const url        = `${DOWNLOAD_VIDEO_ENDPOINT}${encoded}`;
+  const encoded = encodeURIComponent(youtubeUrl);
+  const url = `${DOWNLOAD_VIDEO_ENDPOINT}${encoded}`;
 
   try {
     const event_source = new EventSource(url);
     //
-    event_source.onopen = () => {
-      //
-      console.log('Connection opened');
-    };
-    //
-
-    event_source.onmessage = (event) => {
-      //
-    };
-
-    //
     event_source.onerror = (err) => {
+      _ShowErrorToast({
+        message: "Error Downloading video data - " + err.message,
+      });
+
       event_source.close();
-      _OnDownloadVideoApiCallDidFinish();
+      g_InfoData.videoExists = false;
+      _SetStateToReadyToFetchData();
     };
 
     //
     event_source.onclose = () => {
-      //
+      g_InfoData.videoExists = true;
       _OnDownloadVideoApiCallDidFinish();
     };
   }
   catch (err) {
-    console.log(err);
+    _ShowErrorToast({
+      message: "Error Downloading video - " + err.message,
+    });
+
+
+    g_InfoData.videoExists = false;
+    _SetStateToReadyToFetchData();
   }
 }
 
 // -----------------------------------------------------------------------------
-async function _OnDownloadVideoApiCallDidFinish()
-{
-  g_FetchButton.innerText = "Converting video...";
-  g_FetchButton.className = "buttonConverting";
-
-  g_DownloadVideoButton.className = "";
+async function _OnDownloadVideoApiCallDidFinish() {
+  _SetStateToConvertingVideo();
   _CallConvertVideoApi();
 }
 
 // -----------------------------------------------------------------------------
-async function _CallConvertVideoApi()
-{
+async function _CallConvertVideoApi() {
   const youtubeUrl = g_YoutubeUrl;
-  const encoded    = encodeURIComponent(youtubeUrl);
-  const url        = `${CONVERT_VIDEO_ENDPOINT}${encoded}`;
+  const encoded = encodeURIComponent(youtubeUrl);
+  const url = `${CONVERT_VIDEO_ENDPOINT}${encoded}`;
 
   try {
     const event_source = new EventSource(url);
-    //
-    event_source.onopen = () => {
-      //
-      console.log('Connection opened');
-    };
-    //
-
-    event_source.onmessage = (event) => {
-      //
-    };
-
-    //
     event_source.onerror = (err) => {
+      _ShowErrorToast({
+        message: "Error Converting video data- " + err.message,
+      });
+
       event_source.close();
-      _OnConvertVideoApiCallDidFinish();
+      g_InfoData.audioExists = false;
+      _SetStateToReadyToFetchData();
     };
 
     //
     event_source.onclose = () => {
-      //
+      g_InfoData.audioExists = true;
       _OnConvertVideoApiCallDidFinish();
     };
   }
   catch (err) {
-    console.log(err);
+    _ShowErrorToast({
+      message: "Error Converting video - " + err.message,
+    });
+
+    g_InfoData.audioExists = false;
+    _SetStateToReadyToFetchData();
   }
 }
 // -----------------------------------------------------------------------------
-function _OnConvertVideoApiCallDidFinish()
-{
+function _OnConvertVideoApiCallDidFinish() {
   g_DownloadMusicButton.className = "";
 
   g_FetchButton.innerText = "Fetch again...";
@@ -246,14 +278,39 @@ function _OnConvertVideoApiCallDidFinish()
   _SetAudioStream();
 }
 
+
+//
+// Toast
+//
+async function _ShowErrorToast({ message }) {
+  debugger;
+  Toastify({
+    text: message,
+    duration: 2000,
+    // destination: "https://github.com/apvarun/toastify-js",
+    // newWindow: true,
+    close: true,
+    gravity: "top", // `top` or `bottom`
+    position: "left", // `left`, `center` or `right`
+    // stopOnFocus: true, // Prevents dismissing of toast on hover
+    style: {
+      background: "linear-gradient(to right, #00b09b, #96c93d)",
+    },
+
+    onClick: function () { } // Callback after click
+  }).showToast();
+}
 //
 // Entry Point
 //
 
 // -----------------------------------------------------------------------------
 g_FetchButton.addEventListener("click",
-                               () => {_OnStartFetchDataButtonClicked()});
+  () => { _OnStartFetchDataButtonClicked() });
 g_DownloadMusicButton.addEventListener("click",
-                                       () => {_OnDownloadMusicButtonClicked()});
+  () => { _OnDownloadMusicButtonClicked() });
 g_DownloadVideoButton.addEventListener("click",
-                                       () => {_OnDownloadVideoButtonClicked()});
+  () => { _OnDownloadVideoButtonClicked() });
+
+
+_SetStateToReadyToFetchData();

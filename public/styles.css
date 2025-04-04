@@ -18,16 +18,52 @@
   box-sizing: border-box;
 }
 
+:root {
+  --bg-color: hsl(0, 0%, 8%);
+  --primary-color: hsl(0, 0%, 18%);
+  --secondary-color: hsl(0, 0%, 28%);
+
+  --angle: 45deg;
+  --stop1: 25%;
+  --stop2: 75%;
+
+  --bg-size: 120px;
+  --bg-pos: 60px;
+}
+
+
 /* -------------------------------------------------------------------------- */
 body {
-  background-color: #121212;
-  background-color: #3a3938;
+  background-color: var(--background-color);
   color: #fff;
   font-family: Arial, sans-serif;
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100vh;
+  background-color: var(--bg-color);
+  opacity: var(--opacity);
+
+  background-image:
+    repeating-linear-gradient(var(--angle),
+      var(--primary-color) var(--stop1),
+      transparent var(--stop1),
+      transparent var(--stop2),
+      var(--primary-color) var(--stop2),
+      var(--primary-color)),
+
+    repeating-linear-gradient(var(--angle),
+      var(--primary-color) var(--stop1),
+      var(--secondary-color) var(--stop1),
+      var(--secondary-color) var(--stop2),
+      var(--primary-color) var(--stop2),
+      var(--primary-color));
+
+  background-position:
+    0 0,
+    var(--bg-pos) var(--bg-pos);
+
+  background-size: var(--bg-size) var(--bg-size);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -145,13 +181,14 @@ audio {
 
 /* -------------------------------------------------------------------------- */
 button {
+  font-family: 'Keycaps', sans-serif;
   font-weight: bold;
   text-transform: uppercase;
-  font-family: 'Keycaps', sans-serif;
   font-size: 1.2rem;
 
   border: none;
   border-radius: 4px;
+  /* border-bottom: 3px solid hsl(0, 0%, 100%, 0.1); */
 
   padding: 0.7rem;
   margin-bottom: 8px;
@@ -161,6 +198,12 @@ button {
   background-color: hsl(21, 25%, 35%);
   box-shadow: 0 8px hsl(21, 25%, 20%);
 
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-content: center;
+  justify-content: center;
+  align-items: center;
   /* transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out; */
 }
 
@@ -266,4 +309,61 @@ input {
   background: linear-gradient(90deg, #4caf50, #81c784);
   width: 0%;
   transition: width 0.4s ease-in-out;
+}
+
+
+:root {
+  --bar-width: 8px;
+  --bar-height: 32px;
+  --bar-color: currentColor;
+  --animation-duration: 1.2s;
+
+  --loader-width: calc(var(--bar-width) * 5);
+  --loader-height: calc(var(--bar-height) * 1);
+
+}
+
+
+.lds-facebook {
+  display: inline-block;
+  position: relative;
+  width: var(--loader-width);
+  height: var(--loader-height);
+  transform: translateY(-12.5%);
+}
+
+.lds-facebook div {
+  display: inline-block;
+  position: absolute;
+  width: var(--bar-width);
+  background: var(--bar-color);
+  animation: lds-facebook var(--animation-duration) cubic-bezier(0, 0.5, 0.5, 1) infinite;
+}
+
+.lds-facebook div:nth-child(1) {
+  left: calc(var(--loader-width) * 0.1);
+  animation-delay: calc(-1 * var(--animation-duration) * 0.2);
+}
+
+.lds-facebook div:nth-child(2) {
+  left: calc(var(--loader-width) * 0.4);
+  animation-delay: calc(-1 * var(--animation-duration) * 0.1);
+}
+
+.lds-facebook div:nth-child(3) {
+  left: calc(var(--loader-width) * 0.7);
+  animation-delay: 0s;
+}
+
+@keyframes lds-facebook {
+  0% {
+    top: calc(var(--loader-height) * 0.1);
+    height: var(--bar-height);
+  }
+
+  50%,
+  100% {
+    top: calc(var(--loader-height) * 0.3);
+    height: calc(var(--bar-height) * 0.5);
+  }
 }

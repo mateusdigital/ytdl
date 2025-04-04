@@ -25,36 +25,33 @@ import path from "path";
 import Joi from "joi";
 import fs from "fs";
 // -----------------------------------------------------------------------------
-import {Request, Response} from "express";
+import { Request, Response } from "express";
 // -----------------------------------------------------------------------------
-import {Assert} from "../../lib/mdweb/source/Assert";
-import {ResponseStatus} from "../../lib/mdweb/source/Net/ResponseStatus";
-import {GET, POST} from "../../lib/mdweb/source/Routes/RouteDecorators";
-import {FileUtils} from "../../lib/mdweb/source/FileUtils";
+import { Assert } from "../../lib/mdweb/source/Assert";
+import { ResponseStatus } from "../../lib/mdweb/source/Net/ResponseStatus";
+import { GET, POST } from "../../lib/mdweb/source/Routes/RouteDecorators";
+import { FileUtils } from "../../lib/mdweb/source/FileUtils";
 // -----------------------------------------------------------------------------
-import {YoutubeDownloader} from "./YoutubeDownloader";
-import {Error_CriticalError} from "../../lib/mdweb/source/ErrorUtils/Exceptions";
-import {ThrowNotFoundErrorIf} from "../../lib/mdweb/source/ErrorUtils/ThrowIf";
-import {Service} from "./RoutesService";
-import {info} from "console";
+import { YoutubeDownloader } from "./YoutubeDownloader";
+import { Error_CriticalError } from "../../lib/mdweb/source/ErrorUtils/Exceptions";
+import { ThrowNotFoundErrorIf } from "../../lib/mdweb/source/ErrorUtils/ThrowIf";
+import { Service } from "./RoutesService";
+import { info } from "console";
 
 // -----------------------------------------------------------------------------
 export const Download_Schema = Joi.object({
-  url : Joi.string().required(),
+  url: Joi.string().required(),
 });
 
-function     _GetDefaultDownloadPath()
-{
+function _GetDefaultDownloadPath() {
   return process.env.DOWNLOAD_PATH || "./public/_download";
 }
 
 // -----------------------------------------------------------------------------
-export class ServiceRoutesController
-{
+export class ServiceRoutesController {
   // ---------------------------------------------------------------------------
-  @GET({route : "/stream/*"})
-  static async StreamMusic(req: Request, res: Response)
-  {
+  @GET({ route: "/stream/*" })
+  static async StreamMusic(req: Request, res: Response) {
     const full_url = req.originalUrl.replace("/api/stream/", "");
     console.log("Received URL: ", full_url);
 
@@ -69,7 +66,7 @@ export class ServiceRoutesController
 
     // Stream the file...
     Assert(FileUtils.FileExists(audio_fullpath),
-           `File doesn't exist. - ${audio_fullpath}`);
+      `File doesn't exist. - ${audio_fullpath}`);
 
     //
     const audio_stats = FileUtils.Stat(audio_fullpath);
@@ -88,49 +85,44 @@ export class ServiceRoutesController
   }
 
   // ---------------------------------------------------------------------------
-  @GET({route : "/info/*"}) //
-  static async GetInfo(req: Request, res: Response)
-  {
+  @GET({ route: "/info/*" }) //
+  static async GetInfo(req: Request, res: Response) {
     const full_url = req.originalUrl.replace("/api/info/", "");
     const dir_path = _GetDefaultDownloadPath();
 
-    const payload = await Service.GetInfo({dirPath : dir_path, url : full_url});
+    const payload = await Service.GetInfo({ dirPath: dir_path, url: full_url });
     return ResponseStatus.OK(req, res, payload);
   }
 
   // ---------------------------------------------------------------------------
-  @GET({route : "/download-video/*"})
-  static async Download(req: Request, res: Response)
-  {
-    const full_url    = req.originalUrl.replace("/api/download-video/", "");
+  @GET({ route: "/download-video/*" })
+  static async Download(req: Request, res: Response) {
+    const full_url = req.originalUrl.replace("/api/download-video/", "");
     const decoded_url = decodeURIComponent(full_url);
-    const path        = _GetDefaultDownloadPath();
+    const path = _GetDefaultDownloadPath();
 
     res.setHeader("Content-Type", "text/event-stream");
     res.setHeader("Cache-Control", "no-cache");
     res.setHeader("Connection", "keep-alive");
 
     const result = await Service.DownloadVideo(
-      {dirPath : path, url : decoded_url, writer : res});
-
+      { dirPath: path, url: decoded_url, writer: res });
     res.end();
   }
 
   // ---------------------------------------------------------------------------
-  @GET({route : "/convert-video/*"})
-  static async Convert(req: Request, res: Response)
-  {
-    const full_url    = req.originalUrl.replace("/api/convert-video/", "");
+  @GET({ route: "/convert-video/*" })
+  static async Convert(req: Request, res: Response) {
+    const full_url = req.originalUrl.replace("/api/convert-video/", "");
     const decoded_url = decodeURIComponent(full_url);
-    const path        = _GetDefaultDownloadPath();
+    const path = _GetDefaultDownloadPath();
 
     res.setHeader("Content-Type", "text/event-stream");
     res.setHeader("Cache-Control", "no-cache");
     res.setHeader("Connection", "keep-alive");
 
     const result = await Service.ConvertVideo(
-      {dirPath : path, url : decoded_url, writer : res});
-
+      { dirPath: path, url: decoded_url, writer: res });
     res.end();
   }
 }

@@ -6,6 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Music Streamer</title>
   <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+
 </head>
 
 <body>
@@ -23,7 +25,9 @@
 
       <div class="controlsContainer">
         <input id="youtubeInput" type="text" placeholder="Enter YouTube URL" oninput="_OnChange()" />
-        <button id="playBtn">Fetch Video</button>
+        <button id="playBtn">Fetch Video
+
+        </button>
         <div class="downloadButtonsContainer">
           <button id="downloadMusicButton" class="buttonDisabled">Download Music</button>
           <button id="downloadVideoButton" class="buttonDisabled">Download Video</button>
@@ -36,6 +40,7 @@
   </div>
 
   <script src="app.js"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 </body>
 
 </html>
