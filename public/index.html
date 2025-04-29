@@ -4,43 +4,54 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Music Streamer</title>
+  <title>ytdl - mateus.digital</title>
   <link rel="stylesheet" href="styles.css" />
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
 
 </head>
 
 <body>
-  <div class="app">
-    <header>
+  <main>
+    <section class="artSection">
       <h1>ytdl</h1>
-      <h2>mateusdigital</h2>
-    </header>
+      <h1>mateus.digital</h1>
+    </section>
 
-    <main>
-      <div class="coverContainer">
-        <img id="mediaCover" src="https://placehold.co/300x300" alt="Cover Art" />
-      </div>
-      <audio id="audioPlayer" controls></audio>
+    <section class="mainSection">
+      <div>
+        <nav>
+          <ul>
+            <li><a href="#">mateus.digital</a></li>
+            <li><a href="#">About</a></li>
+            <li><a href="#">GitHub</a></li>
+          </ul>
+        </nav>
+        <div class="titleContainer">
+          <span class="color1">Youtube</span>
+          <span class="color2">Downloader</span>
+        </div>
 
-      <div class="controlsContainer">
-        <input id="youtubeInput" type="text" placeholder="Enter YouTube URL" oninput="_OnChange()" />
-        <button id="playBtn">Fetch Video
+        <div>
+          <img src="https://placehold.co/300x300" alt="Cover Art" />
+        </div>
+        <audio controls></audio>
 
-        </button>
-        <div class="downloadButtonsContainer">
-          <button id="downloadMusicButton" class="buttonDisabled">Download Music</button>
-          <button id="downloadVideoButton" class="buttonDisabled">Download Video</button>
+        <div>
+          <input type="text" placeholder="Enter YouTube URL" oninput="_OnChange()" />
+          <button>Fetch Video
+
+          </button>
+          <div>
+            <button>Download Music</button>
+            <button>Download Video</button>
+          </div>
         </div>
       </div>
-      <!-- <div class="status">
-        <span id="statusMsg"></span>
-      </div> -->
-    </main>
-  </div>
+    </section>
+  </main>
 
-  <script src="app.js"></script>
-  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+  <!-- <script src="app.js"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script> -->
 </body>
 
 </html>
