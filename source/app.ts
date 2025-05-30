@@ -1,18 +1,18 @@
 ﻿// -----------------------------------------------------------------------------
-import mongoose from 'mongoose';
 import path from 'path'
 import express from 'express';
 // -----------------------------------------------------------------------------
-import {App} from '../lib/mdweb/source/Express/App';
-import {SetupRoutesWithController} from '../lib/mdweb/source/Routes/RouteUtils';
-import {
-  SetupErrorHandler
-} from '../lib/mdweb/source/Express/Middleware/ErrorHandler';
+import { App } from '../lib/mdweb/source/Express/App';
+import { Logger } from 'lib/mdweb/source/Logger';
+import { MongoUtils } from 'lib/mdweb/source/DB/MongoUtils';
+import { SetupErrorHandler } from '../lib/mdweb/source/Express/Middleware/ErrorHandler';
+import { SetupRoutesWithController } from '../lib/mdweb/source/Routes/RouteUtils';
+import { SetupServiceInfoPage } from '../lib/mdweb/source/Routes/DefaultRoutes';
 // -----------------------------------------------------------------------------
 import packageJson from '../package.json';
 // -----------------------------------------------------------------------------
-import {ServiceRoutesController} from './controllers/RoutesController';
-import {SetupServiceInfoRoutes} from '../lib/mdweb/source/Routes/DefaultRoutes';
+import { TaskRouteController } from './controllers/TaskRouteController';
+import { UserRouteController } from './controllers/UserRouteController';
 
 //
 // Env
@@ -25,26 +25,42 @@ require('dotenv').config();
 //  App
 //
 
+// -----------------------------------------------------------------------------
 const options = {
-  publicPath : path.join(__dirname, '../', 'public'),
+  publicPath: path.join(__dirname, '../', 'public'),
   packageJson
 };
 
+// -----------------------------------------------------------------------------
 App.Init(options);
 {
   const app = App.GetExpressApp();
 
-  console.log('Public path: ', options.publicPath);
   app.use(express.static(options.publicPath));
 
-  SetupServiceInfoRoutes(app, path.join(options.publicPath, "index.html"));
-  SetupRoutesWithController(ServiceRoutesController, app);
+  SetupServiceInfoPage(app, path.join(options.publicPath, "index.html"));
+
+  SetupRoutesWithController(TaskRouteController, app);
+  SetupRoutesWithController(UserRouteController, app);
+
   SetupErrorHandler(app);
-  // // Global error handler
-  // app.use((err: any, req: any, res: any, next: any) => {
-  //   console.error(err.stack);
-  //   res.status(500).send('Something broke!');
-  // });
 }
 
-App.StartListen(3000);
+MongoUtils.MakeMongooseConnect(
+  // options:
+  {
+    MONGO_URI: process.env.MONGO_URI || '',
+    MONGO_USER: process.env.MONGO_USER || '',
+    MONGO_PASSWORD: process.env.MONGO_PASSWORD || ''
+  },
+  // success:
+  () => {
+    Logger.Info("MongoDB connection established successfully.");
+    Logger.Info("Tasks2me is live at http://localhost:3000");
+    App.StartListen(3000);
+  },
+  // error:
+  (err: any) => {
+    Logger.Error("MongoDB connection error:", err);
+  }
+);
